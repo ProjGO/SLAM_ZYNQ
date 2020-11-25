@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(ORB_SLAM2_FPGA)
 
 SET(CMAKE_BUILD_TYPE Release)
+# SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 MESSAGE("Build type: " ${CMAKE_BUILD_TYPE})
 
@@ -12,15 +13,13 @@ set( CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++ )
 set( CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/install )
 
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall  -O3 -march=armv7-a")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall   -O3 -march=armv7-a")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3 -march=armv7-a")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -O3 -march=armv7-a -std=c++11")  # -pg for using gprof as profiler
 
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -s" )
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -s" )
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}" )
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}" )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_definitions(-DCOMPILEDWITHC11)
-message(STATUS "Using flag -std=c++11.")
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
@@ -31,7 +30,6 @@ ${PROJECT_SOURCE_DIR}/Thirdparty/OpenCV
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
-
 
 add_library(ORB_SLAM2_FPGA SHARED
 src/System.cc
@@ -45,13 +43,13 @@ src/Converter.cc
 src/MapPoint.cc
 src/KeyFrame.cc
 src/Map.cc
-# src/MapDrawer.cc
 src/Optimizer.cc
 src/PnPsolver.cc
 src/Frame.cc
 src/KeyFrameDatabase.cc
 src/Sim3Solver.cc
 src/Initializer.cc
+# src/MapDrawer.cc
 # src/Viewer.cc
 )
 
