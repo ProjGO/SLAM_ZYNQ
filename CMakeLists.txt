@@ -12,12 +12,11 @@ set( CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++ )
 set( CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/install )
 
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall  -O3 -march=armv7-a")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall   -O3 -march=armv7-a")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3 -march=armv7-a")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -march=armv7-a -std=c++11")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_definitions(-DCOMPILEDWITHC11)
-message(STATUS "Using flag -std=c++11.")
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
@@ -40,13 +39,13 @@ src/Converter.cc
 src/MapPoint.cc
 src/KeyFrame.cc
 src/Map.cc
-# src/MapDrawer.cc
 src/Optimizer.cc
 src/PnPsolver.cc
 src/Frame.cc
 src/KeyFrameDatabase.cc
 src/Sim3Solver.cc
 src/Initializer.cc
+# src/MapDrawer.cc
 # src/Viewer.cc
 )
 
@@ -72,7 +71,6 @@ Examples/RGB-D/rgbd_tum.cc)
 target_link_libraries(rgbd_tum ${PROJECT_NAME} ${OPENCV_LIBS})
 
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/myExample)
-add_executable(orbslam_test ${PROJECT_SOURCE_DIR}/Examples/myExample/orbslam_test.cpp)
-target_link_libraries(orbslam_test ${PROJECT_NAME} ${OPENCV_LIBS})
-  
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/myExample)
+# add_executable(orbslam_test ${PROJECT_SOURCE_DIR}/Examples/myExample/orbslam_test.cpp)
+# target_link_libraries(orbslam_test ${PROJECT_NAME} ${OPENCV_LIBS})
