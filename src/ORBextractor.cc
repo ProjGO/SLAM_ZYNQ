@@ -1140,13 +1140,13 @@ void ORBextractor::ComputePyramid(cv::Mat image)
 
 void ORBextractor::printProfileInfo() {
     double avgTimeTotal = 0;
-    for(int i = 0; i < timeTotal.size(); i++) {
+    for(size_t i = 0; i < timeTotal.size(); i++) {
         avgTimeTotal += timeTotal[i];
     }
     avgTimeTotal /= timeTotal.size();
 
-    printf("-----ORBextractor-----\n");
+    printf("---------- ORBextarctor profile info ----------\n");
     printf("average time spent on extracting kp: %lf\n", avgTimeTotal);
-    printf("----------------------\n");
+    printf("-----------------------------------------------\n");
 }
 } //namespace ORB_SLAM

@@ -1589,6 +1589,7 @@ void Tracking::InformOnlyTracking(const bool &flag)
 
 void Tracking::printProfileInfo() {
     mpORBextractorLeft->printProfileInfo();
+    ORBmatcher::printProfileInfo();
 }
 
 } //namespace ORB_SLAM

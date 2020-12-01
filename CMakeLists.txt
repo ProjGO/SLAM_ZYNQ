@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(ORB_SLAM2)
+project(ORB_SLAM2_PROFILING)
 
 SET(CMAKE_BUILD_TYPE Release)
 
@@ -66,9 +66,9 @@ set(OPENCV_LIBS -lopencv_dnn -lopencv_highgui -lopencv_ml -lopencv_objdetect -lo
                 -lswresample -lswscale -lx264)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/RGB-D)
-add_executable(rgbd_tum
+add_executable(rgbd_tum_profiling
 Examples/RGB-D/rgbd_tum.cc)
-target_link_libraries(rgbd_tum ${PROJECT_NAME} ${OPENCV_LIBS})
+target_link_libraries(rgbd_tum_profiling ${PROJECT_NAME} ${OPENCV_LIBS})
 
 
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/myExample)
