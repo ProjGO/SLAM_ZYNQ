@@ -1,0 +1,14 @@
+prefix=/home/magicstudio/SLAM_ZYNQ/libs/install
+exec_prefix=${prefix}
+libdir=/home/magicstudio/SLAM_ZYNQ/libs/install/lib
+includedir=/home/magicstudio/SLAM_ZYNQ/libs/install/include
+
+Name: libavdevice
+Description: FFmpeg device handling library
+Version: 58.11.103
+Requires: 
+Requires.private: libavfilter >= 7.91.100, libswscale >= 5.8.100, libpostproc >= 55.8.100, libavformat >= 58.64.100, libavcodec >= 58.114.100, libswresample >= 3.8.100, libavresample >= 4.0.0, libavutil >= 56.61.100
+Conflicts:
+Libs: -L${libdir}  -lavdevice 
+Libs.private: -lm
+Cflags: -I${includedir}

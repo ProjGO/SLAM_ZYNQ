@@ -149,7 +149,7 @@
 /* #undef HAVE_OPENNI */
 
 /* OpenNI library */
-/* #undef HAVE_OPENNI2 */
+#define HAVE_OPENNI2
 
 /* PNG codec */
 #define HAVE_PNG

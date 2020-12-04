@@ -14,7 +14,7 @@ set( CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/install )
 
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3 -march=armv7-a")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -O3 -march=armv7-a -std=c++11")  # -pg for using gprof as profiler
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -march=armv7-a -std=c++11 -Wl,-rpath-link=../Thirdparty/OpenCV/lib")  # -pg for using gprof as profiler
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}" )
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}" )
@@ -88,6 +88,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/RGB-D)
 add_executable(rgbd_tum_fpga
 Examples/RGB-D/rgbd_tum.cc)
 target_link_libraries(rgbd_tum_fpga ORB_SLAM2_FPGA ${OPENCV_LIBS})
+
+add_executable(openni_test
+Examples/openni_test/openni_test.cpp)
+target_link_libraries(openni_test ${OPENCV_LIBS})
 
 
 # tests

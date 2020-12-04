@@ -1,0 +1,14 @@
+prefix=/home/magicstudio/SLAM_ZYNQ/libs/install
+exec_prefix=${prefix}
+libdir=/home/magicstudio/SLAM_ZYNQ/libs/install/lib
+includedir=/home/magicstudio/SLAM_ZYNQ/libs/install/include
+
+Name: libavcodec
+Description: FFmpeg codec library
+Version: 58.114.100
+Requires: 
+Requires.private: libswresample >= 3.8.100, libavutil >= 56.61.100
+Conflicts:
+Libs: -L${libdir}  -lavcodec 
+Libs.private: -pthread -lm -lx264 -pthread -lm -lxvidcore
+Cflags: -I${includedir}
