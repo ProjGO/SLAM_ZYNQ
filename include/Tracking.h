@@ -39,6 +39,7 @@
 #include "System.h"
 
 #include <mutex>
+#include <chrono>
 
 namespace ORB_SLAM2
 {
@@ -216,6 +217,10 @@ protected:
     bool mbRGB;
 
     list<MapPoint*> mlpTemporalPoints;
+
+    const int miMaxExecTimes = 2000;
+    vector<double> mvTimeTrackLocalMap;
+    vector<double> mvTimeTrackWithMotionModel;
 };
 
 } //namespace ORB_SLAM

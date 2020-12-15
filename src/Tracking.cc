@@ -866,6 +866,7 @@ void Tracking::UpdateLastFrame()
 
 bool Tracking::TrackWithMotionModel()
 {
+    auto t1 = chrono::steady_clock::now();
     ORBmatcher matcher(0.9,true);
 
     // Update last frame pose according to its reference keyframe
@@ -924,11 +925,14 @@ bool Tracking::TrackWithMotionModel()
         return nmatches>20;
     }
 
+    auto t2 = chrono::steady_clock::now();
+    mvTimeTrackWithMotionModel.push_back(chrono::duration_cast<chrono::duration<double> >(t2 - t1).count());
     return nmatchesMap>=10;
 }
 
 bool Tracking::TrackLocalMap()
 {
+    auto t1 = chrono::steady_clock::now();
     // We have an estimation of the camera pose and some map points tracked in the frame.
     // We retrieve the local map and try to find matches to points in the local map.
 
@@ -966,6 +970,9 @@ bool Tracking::TrackLocalMap()
     // More restrictive if there was a relocalization recently
     if(mCurrentFrame.mnId<mnLastRelocFrameId+mMaxFrames && mnMatchesInliers<50)
         return false;
+    
+    auto t2 = chrono::steady_clock::now();
+    mvTimeTrackLocalMap.push_back(chrono::duration_cast<chrono::duration<double> >(t2 - t1).count());
 
     if(mnMatchesInliers<30)
         return false;
@@ -1590,6 +1597,19 @@ void Tracking::InformOnlyTracking(const bool &flag)
 void Tracking::printProfileInfo() {
     mpORBextractorLeft->printProfileInfo();
     ORBmatcher::printProfileInfo();
+
+    double ttTimeTrackLocalMap = 0, ttTimeTrackWithMotionModel = 0;
+    for(int i = 0; i < mvTimeTrackLocalMap.size(); i++)
+        ttTimeTrackLocalMap += mvTimeTrackLocalMap[i];
+    for(int i = 0; i < mvTimeTrackWithMotionModel.size(); i++)
+        ttTimeTrackWithMotionModel += mvTimeTrackWithMotionModel[i];
+    
+    printf("---------- Tracker profile info ----------\n");
+    printf("TrackLocalMap:\n");
+    printf("\tcalled %d times, avgTime: %lf\n", mvTimeTrackLocalMap.size(), ttTimeTrackLocalMap / mvTimeTrackLocalMap.size());
+    printf("TrackWithMotionModel:\n");
+    printf("\tcalled %d times, avgTime: %lf\n", mvTimeTrackWithMotionModel.size(), ttTimeTrackWithMotionModel / mvTimeTrackWithMotionModel.size());
+    printf("------------------------------------------\n");
 }
 
 } //namespace ORB_SLAM
