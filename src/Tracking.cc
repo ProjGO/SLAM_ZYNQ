@@ -146,6 +146,9 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
             mDepthMapFactor = 1.0f/mDepthMapFactor;
     }
 
+    mvTimeTrackLocalMap.reserve(miMaxExecTimes);
+    mvTimeTrackWithMotionModel.reserve(miMaxExecTimes);
+
 }
 
 void Tracking::SetLocalMapper(LocalMapping *pLocalMapper)
@@ -1147,58 +1150,6 @@ void Tracking::CreateNewKeyFrame()
     mpLastKeyFrame = pKF;
 }
 
-void Tracking::SearchLocalPoints()
-{
-    // Do not search map points already matched
-    for(vector<MapPoint*>::iterator vit=mCurrentFrame.mvpMapPoints.begin(), vend=mCurrentFrame.mvpMapPoints.end(); vit!=vend; vit++)
-    {
-        MapPoint* pMP = *vit;
-        if(pMP)
-        {
-            if(pMP->isBad())
-            {
-                *vit = static_cast<MapPoint*>(NULL);
-            }
-            else
-            {
-                pMP->IncreaseVisible();
-                pMP->mnLastFrameSeen = mCurrentFrame.mnId;
-                pMP->mbTrackInView = false;
-            }
-        }
-    }
-
-    int nToMatch=0;
-
-    // Project points in frame and check its visibility
-    for(vector<MapPoint*>::iterator vit=mvpLocalMapPoints.begin(), vend=mvpLocalMapPoints.end(); vit!=vend; vit++)
-    {
-        MapPoint* pMP = *vit;
-        if(pMP->mnLastFrameSeen == mCurrentFrame.mnId)
-            continue;
-        if(pMP->isBad())
-            continue;
-        // Project (this fills MapPoint variables for matching)
-        if(mCurrentFrame.isInFrustum(pMP,0.5))
-        {
-            pMP->IncreaseVisible();
-            nToMatch++;
-        }
-    }
-
-    if(nToMatch>0)
-    {
-        ORBmatcher matcher(0.8);
-        int th = 1;
-        if(mSensor==System::RGBD)
-            th=3;
-        // If the camera has been relocalised recently, perform a coarser search
-        if(mCurrentFrame.mnId<mnLastRelocFrameId+2)
-            th=5;
-        matcher.SearchByProjection(mCurrentFrame,mvpLocalMapPoints,th);
-    }
-}
-
 void Tracking::UpdateLocalMap()
 {
     // This is for visualization
@@ -1211,6 +1162,8 @@ void Tracking::UpdateLocalMap()
 
 void Tracking::UpdateLocalPoints()
 {
+    auto t1 = chrono::steady_clock::now();
+
     mvpLocalMapPoints.clear();
 
     for(vector<KeyFrame*>::const_iterator itKF=mvpLocalKeyFrames.begin(), itEndKF=mvpLocalKeyFrames.end(); itKF!=itEndKF; itKF++)
@@ -1232,11 +1185,15 @@ void Tracking::UpdateLocalPoints()
             }
         }
     }
-}
 
+    auto t2 = chrono::steady_clock::now();
+    mvTimeUpdateLocalPoints.push_back(chrono::duration_cast<chrono::duration<double> >(t2 - t1).count());
+}
 
 void Tracking::UpdateLocalKeyFrames()
 {
+    auto t1 = chrono::steady_clock::now();
+
     // Each map point vote for the keyframes in which it has been observed
     map<KeyFrame*,int> keyframeCounter;
     for(int i=0; i<mCurrentFrame.N; i++)
@@ -1343,6 +1300,66 @@ void Tracking::UpdateLocalKeyFrames()
         mpReferenceKF = pKFmax;
         mCurrentFrame.mpReferenceKF = mpReferenceKF;
     }
+
+    auto t2 = chrono::steady_clock::now();
+    mvTimeUpdateLocalKeyframes.push_back(chrono::duration_cast<chrono::duration<double> >(t2 - t1).count());
+}
+
+void Tracking::SearchLocalPoints()
+{
+    auto t1 = chrono::steady_clock::now();
+
+    // Do not search map points already matched
+    for(vector<MapPoint*>::iterator vit=mCurrentFrame.mvpMapPoints.begin(), vend=mCurrentFrame.mvpMapPoints.end(); vit!=vend; vit++)
+    {
+        MapPoint* pMP = *vit;
+        if(pMP)
+        {
+            if(pMP->isBad())
+            {
+                *vit = static_cast<MapPoint*>(NULL);
+            }
+            else
+            {
+                pMP->IncreaseVisible();
+                pMP->mnLastFrameSeen = mCurrentFrame.mnId;
+                pMP->mbTrackInView = false;
+            }
+        }
+    }
+
+    int nToMatch=0;
+
+    // Project points in frame and check its visibility
+    for(vector<MapPoint*>::iterator vit=mvpLocalMapPoints.begin(), vend=mvpLocalMapPoints.end(); vit!=vend; vit++)
+    {
+        MapPoint* pMP = *vit;
+        if(pMP->mnLastFrameSeen == mCurrentFrame.mnId)
+            continue;
+        if(pMP->isBad())
+            continue;
+        // Project (this fills MapPoint variables for matching)
+        if(mCurrentFrame.isInFrustum(pMP,0.5))
+        {
+            pMP->IncreaseVisible();
+            nToMatch++;
+        }
+    }
+
+    if(nToMatch>0)
+    {
+        ORBmatcher matcher(0.8);
+        int th = 1;
+        if(mSensor==System::RGBD)
+            th=3;
+        // If the camera has been relocalised recently, perform a coarser search
+        if(mCurrentFrame.mnId<mnLastRelocFrameId+2)
+            th=5;
+        matcher.SearchByProjection(mCurrentFrame,mvpLocalMapPoints,th);
+    }
+
+    auto t2 = chrono::steady_clock::now();
+    mvTimeSearchLocalPoints.push_back(chrono::duration_cast<chrono::duration<double> >(t2 - t1).count());
 }
 
 bool Tracking::Relocalization()
@@ -1598,17 +1615,30 @@ void Tracking::printProfileInfo() {
     mpORBextractorLeft->printProfileInfo();
     ORBmatcher::printProfileInfo();
 
-    double ttTimeTrackLocalMap = 0, ttTimeTrackWithMotionModel = 0;
+    double ttTimeTrackLocalMap = 0, ttTimeTrackWithMotionModel = 0, ttTimeUpdateLocalPoints = 0,
+           ttTimeUpdateLocalKeyframes = 0, ttTimeSearchLocalPoints = 0;
     for(int i = 0; i < mvTimeTrackLocalMap.size(); i++)
         ttTimeTrackLocalMap += mvTimeTrackLocalMap[i];
     for(int i = 0; i < mvTimeTrackWithMotionModel.size(); i++)
         ttTimeTrackWithMotionModel += mvTimeTrackWithMotionModel[i];
+    for(double time : mvTimeUpdateLocalPoints)
+        ttTimeUpdateLocalPoints += time;
+    for(double time : mvTimeUpdateLocalKeyframes)
+        ttTimeUpdateLocalKeyframes += time;
+    for(double time : mvTimeSearchLocalPoints)
+        ttTimeSearchLocalPoints += time;
     
     printf("---------- Tracker profile info ----------\n");
     printf("TrackLocalMap:\n");
     printf("\tcalled %d times, avgTime: %lf\n", mvTimeTrackLocalMap.size(), ttTimeTrackLocalMap / mvTimeTrackLocalMap.size());
     printf("TrackWithMotionModel:\n");
     printf("\tcalled %d times, avgTime: %lf\n", mvTimeTrackWithMotionModel.size(), ttTimeTrackWithMotionModel / mvTimeTrackWithMotionModel.size());
+    printf("UpdateLocalPoints:\n");
+    printf("\tcalled %d times, avgTime: %lf\n", mvTimeUpdateLocalPoints.size(), ttTimeUpdateLocalPoints / mvTimeUpdateLocalPoints.size());
+    printf("UpdateLocalKeyframes:\n");
+    printf("\tcalled %d times, avgTime: %lf\n", mvTimeUpdateLocalKeyframes.size(), ttTimeUpdateLocalKeyframes / mvTimeUpdateLocalKeyframes.size());
+    printf("SearchLocalPoints:\n");
+    printf("\tcalled %d times, avgTime: %lf\n", mvTimeSearchLocalPoints.size(), ttTimeSearchLocalPoints / mvTimeSearchLocalPoints.size());
     printf("------------------------------------------\n");
 }
 

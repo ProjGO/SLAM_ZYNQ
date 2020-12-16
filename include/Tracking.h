@@ -221,6 +221,9 @@ protected:
     const int miMaxExecTimes = 2000;
     vector<double> mvTimeTrackLocalMap;
     vector<double> mvTimeTrackWithMotionModel;
+    vector<double> mvTimeUpdateLocalPoints;
+    vector<double> mvTimeUpdateLocalKeyframes;
+    vector<double> mvTimeSearchLocalPoints;
 };
 
 } //namespace ORB_SLAM

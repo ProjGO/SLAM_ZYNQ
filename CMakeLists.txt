@@ -74,3 +74,9 @@ target_link_libraries(rgbd_tum_profiling ${PROJECT_NAME} ${OPENCV_LIBS})
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/myExample)
 # add_executable(orbslam_test ${PROJECT_SOURCE_DIR}/Examples/myExample/orbslam_test.cpp)
 # target_link_libraries(orbslam_test ${PROJECT_NAME} ${OPENCV_LIBS})
+
+# Build tools for converting vocabulary file from ASCII to binary format
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/tools)
+add_executable(bin_vocabulary
+tools/bin_vocabulary.cc)
+target_link_libraries(bin_vocabulary ${PROJECT_NAME})
